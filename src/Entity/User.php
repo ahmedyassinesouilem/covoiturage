@@ -2,29 +2,32 @@
 
 namespace App\Entity;
 
-use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use App\Repository\UserRepository;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
+#[ORM\Table(name: 'user')]
+#[ORM\InheritanceType('SINGLE_TABLE')]
+#[ORM\DiscriminatorColumn(name: 'discr', type: 'string')]
+#[ORM\DiscriminatorMap(['user' => User::class, 'passenger' => Passenger::class, 'driver' => Driver::class])]
 #[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\Column(length: 180)]
+    #[ORM\Column(length: 180, unique: true)]
     private ?string $email = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'json')]
     private array $roles = [];
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'string')]
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
@@ -34,23 +37,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private bool $isValidated = false;
 
     #[ORM\Column(length: 10)]
-    private ?string $userType = null; // Fixed length definition
+    private ?string $userType = null;
 
-    // Getter for userType
-    public function getUserType(): ?string
-    {
-        return $this->userType;
-    }
-
-    // Setter for userType
-    public function setUserType(string $userType): static
-    {
-        $this->userType = $userType; // Corrected variable name
-        return $this;
-    }
-
-    // Other getters and setters...
-
+    // Getter and setter methods for the properties...
     public function getId(): ?int
     {
         return $this->id;
@@ -70,7 +59,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getRoles(): array
     {
         $roles = $this->roles;
-        // Ensure every user has at least ROLE_USER
         $roles[] = 'ROLE_USER';
         return array_unique($roles);
     }
@@ -99,7 +87,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function eraseCredentials(): void
     {
-        // Clear any sensitive data stored on the user
     }
 
     public function getLastName(): ?string
@@ -121,6 +108,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setValidated(bool $isValidated): static
     {
         $this->isValidated = $isValidated;
+        return $this;
+    }
+
+    public function getUserType(): ?string
+    {
+        return $this->userType;
+    }
+
+    public function setUserType(string $userType): static
+    {
+        $this->userType = $userType;
         return $this;
     }
 }

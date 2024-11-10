@@ -6,7 +6,7 @@
     <h1>Register</h1>
 
     {{ form_errors(registrationForm) }}
-
+    
     {{ form_start(registrationForm) }}
         {{ form_row(registrationForm.email) }}
         {{ form_row(registrationForm.plainPassword, {
@@ -15,7 +15,20 @@
         {{ form_row(registrationForm.lastName) }}
         {{ form_row(registrationForm.userType) }}
         {{ form_row(registrationForm.agreeTerms) }}
-        
+
+        {# Driver-specific fields (conditionally rendered) #}
+        {% if registrationForm.adress is defined %}
+            {{ form_row(registrationForm.adress) }}
+        {% endif %}
+        {% if registrationForm.dateNaissance is defined %}
+            {{ form_row(registrationForm.dateNaissance) }}
+        {% endif %}
+        {% if registrationForm.photo is defined %}
+            {{ form_row(registrationForm.photo) }}
+        {% endif %}
+        {% if registrationForm.numpermis is defined %}
+            {{ form_row(registrationForm.numpermis) }}
+        {% endif %}
 
         <button type="submit" class="btn">Register</button>
     {{ form_end(registrationForm) }}
